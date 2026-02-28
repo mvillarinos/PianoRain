@@ -72,7 +72,7 @@
     startRenderLoop();
 
     // Attempt to load Essentia.js WASM for better pitch accuracy
-    const wasmUrl = chrome.runtime.getURL('vendor/essentia/essentia-wasm.module.js');
+    const wasmUrl = chrome.runtime.getURL('vendor/essentia/essentia-wasm.web.js');
     loadEssentia(wasmUrl).catch(() => {});
 
     sendStatus('active');

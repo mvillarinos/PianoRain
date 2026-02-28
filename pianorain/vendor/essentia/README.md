@@ -2,8 +2,8 @@
 
 Place the following Essentia.js WASM build files in this directory:
 
-- `essentia-wasm.module.js`
-- `essentia-wasm.wasm`
+- `essentia-wasm.web.js`
+- `essentia-wasm.web.wasm`
 
 ## How to obtain
 
@@ -12,15 +12,15 @@ Download the latest pre-built WASM distribution from the official Essentia.js re
 **Option A — CDN / GitHub Releases:**
 
 1. Visit https://github.com/MTG/essentia.js/releases
-2. Download the latest `essentia-wasm.module.js` and `essentia-wasm.wasm` files
+2. Download the latest `essentia-wasm.web.js` and `essentia-wasm.web.wasm` files
 3. Place both files in this directory (`pianorain/vendor/essentia/`)
 
 **Option B — npm package:**
 
 ```bash
 npm install essentia.js
-cp node_modules/essentia.js/dist/essentia-wasm.module.js ./
-cp node_modules/essentia.js/dist/essentia-wasm.wasm ./
+cp node_modules/essentia.js/dist/essentia-wasm.web.js ./
+cp node_modules/essentia.js/dist/essentia-wasm.web.wasm ./
 ```
 
 ## Fallback behaviour

@@ -108,7 +108,7 @@ let essentiaInstance = null;
 /**
  * Attempts to load the Essentia.js WASM module.
  * Call once during initialisation.  Safe to call even if the module is absent.
- * @param {string} wasmUrl  - chrome.runtime.getURL('vendor/essentia/essentia-wasm.module.js')
+ * @param {string} wasmUrl  - chrome.runtime.getURL('vendor/essentia/essentia-wasm.web.js')
  */
 async function loadEssentia(wasmUrl) {
   try {
