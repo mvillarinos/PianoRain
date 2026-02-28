@@ -196,11 +196,44 @@
         sendResponse({ ok: true });
         break;
 
+      case 'exportMidi':
+        handleExportMidi().then(sendResponse);
+        return true; // async
+
       case 'ping':
         sendResponse({ ok: true });
         break;
     }
   });
+
+  // ── Export MIDI ────────────────────────────────────────────────────────────
+  async function handleExportMidi() {
+    if (!isActive || !video || !analyser || !audioCtx) {
+      return { error: 'PianoRain must be active to export MIDI.' };
+    }
+    try {
+      sendStatus('exporting', 'Processing video...');
+      const midiData = await exportVideoToMidi(video, analyser, audioCtx, (progress) => {
+        chrome.runtime.sendMessage({
+          target: 'popup',
+          type: 'exportProgress',
+          progress,
+        }).catch(() => {});
+      });
+
+      const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, #info-contents h1');
+      const title = titleEl
+        ? titleEl.textContent.trim().replace(/[^\w\s-]/g, '').substring(0, 60)
+        : 'pianorain-export';
+      downloadMidiFile(midiData, `${title}.mid`);
+
+      sendStatus('active');
+      return { ok: true };
+    } catch (e) {
+      sendStatus('active');
+      return { error: 'MIDI export failed: ' + e.message };
+    }
+  }
 
   // ── SPA navigation (YouTube navigates without full page reload) ────────────
   document.addEventListener('yt-navigate-finish', () => {

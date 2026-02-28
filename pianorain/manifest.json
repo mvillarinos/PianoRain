@@ -29,6 +29,7 @@
         "lib/piano-renderer.js",
         "lib/falling-notes.js",
         "lib/playhead-sync.js",
+        "lib/midi-export.js",
         "content.js"
       ],
       "run_at": "document_idle"
