@@ -221,6 +221,16 @@
         }).catch(() => {});
       });
 
+      // An empty-notes MIDI file contains only the header chunk (14 bytes) and a track chunk
+      // with just the metadata events (Track Name, Time Signature, Tempo, Program Change,
+      // End-of-Track) = 42 track bytes + 8 chunk header bytes = 50 bytes. Total = 64 bytes.
+      // If the file is no larger than this, no note events were generated.
+      const EMPTY_MIDI_SIZE = 64;
+      if (midiData.length <= EMPTY_MIDI_SIZE) {
+        sendStatus('active');
+        return { error: 'No piano notes were detected in this video.' };
+      }
+
       const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, #info-contents h1');
       const title = titleEl
         ? titleEl.textContent.trim().replace(/[^\w\s-]/g, '').substring(0, 60)
