@@ -206,10 +206,9 @@
   document.addEventListener('yt-navigate-finish', () => {
     if (isActive) {
       deactivate();
-      chrome.storage.local.get(['active', 'noteColor'], (prefs) => {
-        if (prefs.active) activate(prefs.noteColor);
-      });
     }
+    // Always reset stored active state on navigation so popup shows "Inactive"
+    chrome.storage.local.set({ active: false });
   });
 
 })();
