@@ -37,14 +37,16 @@ function buildMidiFile(notes) {
   const TICKS_PER_QUARTER = 480;
   const BPM = 120;
   const TICKS_PER_SECOND = TICKS_PER_QUARTER * BPM / 60; // 960
+  const MAX_DELTA = 0x0FFFFFFF;
 
   // Convert note events to MIDI events sorted by time
   const midiEvents = [];
 
   for (const note of notes) {
     if (note.endTime <= note.startTime) continue;
-    midiEvents.push({ time: note.startTime, type: 0x90, note: note.midi, velocity: 80 });
-    midiEvents.push({ time: note.endTime,   type: 0x80, note: note.midi, velocity: 0 });
+    const midiNote = note.midi & 0x7F;
+    midiEvents.push({ time: note.startTime, type: 0x90, note: midiNote, velocity: 80 });
+    midiEvents.push({ time: note.endTime,   type: 0x80, note: midiNote, velocity: 0 });
   }
 
   // Sort by time, note-off before note-on at the same time
@@ -56,19 +58,34 @@ function buildMidiFile(notes) {
   // Build track chunk bytes
   const trackBytes = [];
 
-  // Tempo meta event: delta=0, FF 51 03 <3-byte microseconds>
-  const usPerBeat = 500000; // 120 BPM
+  // Track Name meta event: delta=0, FF 03 <len> "PianoRain Export"
+  const trackName = 'PianoRain Export';
+  const nameBytes = [];
+  for (let i = 0; i < trackName.length; i++) {
+    nameBytes.push(trackName.charCodeAt(i));
+  }
+  trackBytes.push(...writeVLQ(0), 0xFF, 0x03, ...writeVLQ(nameBytes.length), ...nameBytes);
+
+  // Time Signature meta event: delta=0, FF 58 04 04 02 18 08 (4/4 time)
+  trackBytes.push(...writeVLQ(0), 0xFF, 0x58, 0x04, 0x04, 0x02, 0x18, 0x08);
+
+  // Tempo meta event: delta=0, FF 51 03 <3-byte microseconds per quarter note>
+  const usPerBeat = Math.round(60000000 / BPM); // 500000 for 120 BPM
   trackBytes.push(...writeVLQ(0), 0xFF, 0x51, 0x03,
     (usPerBeat >> 16) & 0xFF,
     (usPerBeat >> 8)  & 0xFF,
      usPerBeat        & 0xFF);
 
+  // Program Change: delta=0, C0 00 (Acoustic Grand Piano on channel 0)
+  trackBytes.push(...writeVLQ(0), 0xC0, 0x00);
+
+  // Note events
   let prevTick = 0;
   for (const ev of midiEvents) {
-    const tick = Math.round(ev.time * TICKS_PER_SECOND);
-    const delta = Math.max(0, tick - prevTick);
+    const tick = Math.max(0, Math.round(ev.time * TICKS_PER_SECOND));
+    const delta = Math.min(MAX_DELTA, Math.max(0, tick - prevTick));
     prevTick = tick;
-    trackBytes.push(...writeVLQ(delta), ev.type, ev.note, ev.velocity);
+    trackBytes.push(...writeVLQ(delta), ev.type, ev.note & 0x7F, ev.velocity & 0x7F);
   }
 
   // End-of-track meta event
