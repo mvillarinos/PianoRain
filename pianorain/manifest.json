@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "PianoRain",
+  "version": "1.0.0",
+  "description": "Real-time piano note detection and Synthesia-style falling notes visualization for YouTube videos.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": [
+        "lib/overlay.js",
+        "lib/audio-capture.js",
+        "lib/note-detector.js",
+        "lib/piano-renderer.js",
+        "lib/falling-notes.js",
+        "lib/playhead-sync.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://www.youtube.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "lib/*.js",
+        "vendor/essentia/*.js",
+        "vendor/essentia/*.wasm"
+      ],
+      "matches": ["*://www.youtube.com/*"]
+    }
+  ]
+}
